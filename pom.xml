@@ -34,6 +34,14 @@
         </developer>
     </developers>
 
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <name>Central Repository OSSRH</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <scm>
         <connection>scm:git:git://github.com/oigroiG-atseT/gtcode-java-net.git</connection>
         <developerConnection>scm:git:ssh://github.com:oigroiG-atseT/gtcode-java-net.git</developerConnection>
