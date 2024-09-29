@@ -27,10 +27,13 @@ public class SingleResponse<T> extends GenericResponse {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e l'oggetto fornito.
-     * @param item l'oggetto che la risposta dovrà contenere
-     * @apiNote questo metodo è stato chiamato in maniera differente dagli altri {@code asSuccess} poiché se impostato a
+     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e l'oggetto fornito.<br>
+     * <p>
+     * NOTA:<br>
+     * questo metodo è stato chiamato in maniera differente dagli altri {@code asSuccess} poiché se impostato a
      * {@code String} entrerebbe in conflitto con {@link GenericResponse#asSuccess(String)}
+     * </p>
+     * @param item l'oggetto che la risposta dovrà contenere
      */
     public void asSuccessful(T item) {
         super.asSuccess();
