@@ -3,7 +3,7 @@ package it.gtcode.net.response;
 import lombok.AllArgsConstructor;
 
 /**
- * Implementazione di base di {@link Status}.</br>
+ * Implementazione di base di {@link Status}.
  * @since 1.0
  * @author Giorgio Testa
  */
