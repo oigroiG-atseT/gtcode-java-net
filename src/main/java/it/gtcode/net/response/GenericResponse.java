@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Implementazione di {@code Response}.</br>
+ * Implementazione di {@code Response}.<br>
  * Rappresenta una risposta generica contenente solamente l'esito e un eventuale
  * messaggio di risposta.<br>
  * Per indicare lo stato della risposta viene utilizzata l'enum {@link BasicStatus}.

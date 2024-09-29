@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rappresenta una risposta contenente una lista di oggetti.</br>
+ * Rappresenta una risposta contenente una lista di oggetti.
  * @param <T> il tipo di oggetto contenuto
  * @since 1.0
  * @see GenericResponse
