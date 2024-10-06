@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
  * @author Giorgio Testa
  */
 @AllArgsConstructor
-enum BasicStatus implements Status {
+public enum BasicStatus implements Status {
 
     /** Rappresenta uno stato non definito */
     UNKNOWN(null),
