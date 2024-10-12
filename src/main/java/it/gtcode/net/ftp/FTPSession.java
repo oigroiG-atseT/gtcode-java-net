@@ -3,16 +3,41 @@ package it.gtcode.net.ftp;
 import it.gtcode.net.ftp.response.FTPResponse;
 import it.gtcode.net.ftp.response.FTPStreamResponse;
 
+import java.io.Closeable;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
-public interface FTPSession {
+/**
+ * Rappresenta una sessione istaurata tra un client ed un server FTP.<br>
+ * Mette a disposizione vari metodi per eseguire varie operazioni di base come scambio e rimozione di file ed esecuzione di comandi.
+ * @since 1.1
+ * @author Giorgio Testa
+ */
+public interface FTPSession extends Closeable {
 
+    /**
+     * Indica se questa {@link FTPSession} è aperta o meno.<br>
+     * Invocare metudi su una sessione chiusa comporta il fallimento automatico degli stessi.
+     * @return {@code true} e è aperta, {@code false} altrimenti
+ */
     boolean isOpen();
 
+    /**
+     * Restituisce il percorso con il quale è stata effettuata la connessione al server.
+     * @return il percorso con il quale è stata effettuata la connessione al server
+     */
     Path getRoot();
 
+    /**
+     * Fornisce un {@link FTPStreamResponse} associato alla risorsa richiesta.<br>
+     * E' compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
+     * funzioni di utiliy per semplificare la consumazione della risorsa.
+     * @param file file da richiedere al server
+     * @return un riferimento alla risorsa richiesta ed i relativi codici di risposta del server
+     * @see FTPStreamResponse
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     */
     FTPStreamResponse download(Path file);
 
     /**
@@ -46,10 +71,19 @@ public interface FTPSession {
     FTPResponse delete(Path file);
 
     /**
+     * Esegue il comando fornito sul server.
+     * @param command comando da eseguire
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     */
+    FTPResponse execute(String command);
+
+    /**
      * Tenta di chiudere la sessione, eseguendo il logout e disconnettendosi dal server.<br>
      * Nel caso in cui la sessione risulti essere già chiusa questo comando non ha effetto.
      * @throws UncheckedIOException se viene riscontrato un problema durante la disconnessione dal server
      */
+    @Override
     void close();
 
 }

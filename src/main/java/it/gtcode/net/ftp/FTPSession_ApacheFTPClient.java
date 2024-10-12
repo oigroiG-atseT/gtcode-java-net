@@ -11,33 +11,94 @@ import org.apache.commons.net.ftp.FTPConnectionClosedException;
 import java.io.*;
 import java.nio.file.Path;
 
+/**
+ * Implementazione di default di {@link FTPSession}.
+ * @since 1.1
+ * @see FTPSession
+ * @author Giorgio Testa
+ */
 @EqualsAndHashCode
 public class FTPSession_ApacheFTPClient implements FTPSession {
 
+    private final FTPConfiguration configuration;
     private final FTPClient ftpClient;
     private final Path root;
     private boolean open;
 
-    public FTPSession_ApacheFTPClient(FTPClient ftpClient, Path root) {
-        this.ftpClient = ftpClient;
-        this.root = root;
+    /**
+     * Costruttore.
+     * @param configuration configurazione con la quale creare la sessione
+     * @throws UncheckedIOException se non è stato possibile creare la sessione
+     */
+    public FTPSession_ApacheFTPClient(FTPConfiguration configuration) {
+        this.ftpClient = this.createClientInstance(configuration);
+        this.configuration = configuration;
+        this.root = configuration.getDirectory();
         this.open = true;
     }
 
+    /**
+     * Costruttore. A differenza di {@link #FTPSession_ApacheFTPClient(FTPConfiguration)} utilizza un client già inizializzato.
+     * @param configuration configurazione con la quale è stato creato inizializzato il client
+     * @param ftpClient client da utilizzare per comunicare con il server
+     * @see #FTPSession_ApacheFTPClient(FTPConfiguration) 
+     */
+    public FTPSession_ApacheFTPClient(FTPConfiguration configuration, FTPClient ftpClient) {
+        this.ftpClient = ftpClient;
+        this.configuration = configuration;
+        this.root = configuration.getDirectory();
+        this.open = true;
+    }
+
+    /**
+     * Data la configurazione fornita tenta di inizializzare una connessione verso il server FTP.
+     * @param ftpConfiguration configurazione con la quale inizializzare il client
+     * @return {@link FTPClient} connesso alle coordinate fornite
+     * @throws UncheckedIOException se non è stato possibile trovare, connettersi o eseguire il login al server
+     */
+    private FTPClient createClientInstance(FTPConfiguration ftpConfiguration) {
+        var client = new FTPClient();
+        try {
+            client.connect(ftpConfiguration.getServer(), ftpConfiguration.getPort());
+            client.login(ftpConfiguration.getUsername(), ftpConfiguration.getPassword());
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(
+                    String.format(
+                            "Non è stato possibile connettersi al server: (%s) %s",
+                            client.getReplyCode(), client.getReplyString()
+                    ),
+                    ioe
+            );
+        }
+        return client;
+    }
+
+    /**
+     * Indica se questa {@link FTPSession} è aperta o meno.<br>
+     * Invocare metudi su una sessione chiusa comporta il fallimento automatico degli stessi.
+     * @return {@code true} e è aperta, {@code false} altrimenti
+     */
     @Override
     public boolean isOpen() {
         return this.open;
     }
 
+    /**
+     * Restituisce il percorso con il quale è stata effettuata la connessione al server.
+     * @return il percorso con il quale è stata effettuata la connessione al server
+     */
     @Override
     public Path getRoot() {
         return this.root;
     }
 
     /**
-     *
-     * @param file
-     * @return
+     * Fornisce un {@link FTPStreamResponse} associato alla risorsa richiesta.<br>
+     * E' compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
+     * funzioni di utiliy per semplificare la consumazione della risorsa.
+     * @param file file da richiedere al server
+     * @return un riferimento alla risorsa richiesta ed i relativi codici di risposta del server
+     * @see FTPStreamResponse
      * @throws IllegalStateException se la sessione non può essere utilizzata
      */
     @Override
@@ -138,6 +199,31 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
             this.throwWhenFalse(
                     ftpClient.deleteFile(file.toString()),
                     "Impossibile rimuovere il file dal server"
+            );
+        } catch (FTPConnectionClosedException fce) {
+            this.handleFTPConnectionClosedException();
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+        } catch (IOException ioe) {
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
+        }
+        return response;
+    }
+
+    /**
+     * Esegue il comando fornito sul server.
+     * @param command comando da eseguire
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     */
+    @Override
+    public FTPResponse execute(String command) {
+        this.canExecute();
+        var response = new FTPResponse();
+        try {
+            this.resetPosition();
+            this.throwWhenFalse(
+                    ftpClient.sendSiteCommand(command),
+                    "Impossibile eseguire il comando fornito"
             );
         } catch (FTPConnectionClosedException fce) {
             this.handleFTPConnectionClosedException();
