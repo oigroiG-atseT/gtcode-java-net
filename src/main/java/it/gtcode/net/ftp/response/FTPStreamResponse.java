@@ -61,14 +61,17 @@ public class FTPStreamResponse extends FTPResponse {
      * è stato riscontrato un problema durante la terminazione della transazione
      */
     public void close() {
-        this.getStream().ifPresent(stream -> {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                throw new UncheckedIOException(e);
-            }
-        });
-        serverCompleteTransactionCallback.run();
+        try {
+            this.getStream().ifPresent(stream -> {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            });
+        } finally {
+            serverCompleteTransactionCallback.run();
+        }
     }
 
     /**

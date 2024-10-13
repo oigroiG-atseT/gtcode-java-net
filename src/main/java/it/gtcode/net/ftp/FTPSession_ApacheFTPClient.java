@@ -9,6 +9,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 /**
@@ -33,7 +34,7 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
     public FTPSession_ApacheFTPClient(FTPConfiguration configuration) {
         this.ftpClient = this.createClientInstance(configuration);
         this.configuration = configuration;
-        this.root = configuration.getDirectory();
+        this.root = this.getRoot(configuration);
         this.open = true;
     }
 
@@ -46,41 +47,27 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
     public FTPSession_ApacheFTPClient(FTPConfiguration configuration, FTPClient ftpClient) {
         this.ftpClient = ftpClient;
         this.configuration = configuration;
-        this.root = configuration.getDirectory();
+        this.root = this.getRoot(configuration);
         this.open = true;
     }
 
     /**
-     * Data la configurazione fornita tenta di inizializzare una connessione verso il server FTP.
-     * @param ftpConfiguration configurazione con la quale inizializzare il client
-     * @return {@link FTPClient} connesso alle coordinate fornite
-     * @throws UncheckedIOException se non è stato possibile trovare, connettersi o eseguire il login al server
-     */
-    private FTPClient createClientInstance(FTPConfiguration ftpConfiguration) {
-        var client = new FTPClient();
-        try {
-            client.connect(ftpConfiguration.getServer(), ftpConfiguration.getPort());
-            client.login(ftpConfiguration.getUsername(), ftpConfiguration.getPassword());
-        } catch (IOException ioe) {
-            throw new UncheckedIOException(
-                    String.format(
-                            "Non è stato possibile connettersi al server: (%s) %s",
-                            client.getReplyCode(), client.getReplyString()
-                    ),
-                    ioe
-            );
-        }
-        return client;
-    }
-
-    /**
      * Indica se questa {@link FTPSession} è aperta o meno.<br>
-     * Invocare metudi su una sessione chiusa comporta il fallimento automatico degli stessi.
+     * Invocare metodi su una sessione chiusa comporta il fallimento automatico degli stessi.
      * @return {@code true} e è aperta, {@code false} altrimenti
      */
     @Override
     public boolean isOpen() {
         return this.open;
+    }
+
+    /**
+     * Restituisce la configurazione con la quale è stata creata la sessione.
+     * @return la configurazione della sessione
+     */
+    @Override
+    public FTPConfiguration getConfiguration() {
+        return this.configuration;
     }
 
     /**
@@ -94,10 +81,10 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
 
     /**
      * Fornisce un {@link FTPStreamResponse} associato alla risorsa richiesta.<br>
-     * E' compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
-     * funzioni di utiliy per semplificare la consumazione della risorsa.
+     * È compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
+     * funzioni di utility per semplificare la consumazione della risorsa.
      * @param file file da richiedere al server
-     * @return un riferimento alla risorsa richiesta ed i relativi codici di risposta del server
+     * @return un riferimento alla risorsa richiesta e i relativi codici di risposta del server
      * @see FTPStreamResponse
      * @throws IllegalStateException se la sessione non può essere utilizzata
      */
@@ -120,6 +107,20 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
 
     /**
      * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * A differenza di {@link #upload(Path, Path)} il file viene caricato nella directory definita nella configurazione
+     * della sessione.
+     * @param file file da caricare sul server
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @see #upload(Path, Path)
+     */
+    @Override
+    public FTPResponse upload(Path file) {
+        return this.upload(file, root);
+    }
+
+    /**
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
      * A differenza di {@link #upload(Path, InputStream, Path)} l'{@code InputStream} viene creato e gestito direttamente
      * da questo metodo.
      * @param file file da caricare sul server
@@ -134,13 +135,14 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
         var response = new FTPResponse();
         try {
             this.resetPosition();
-            var remoteFile = target.relativize(file.getFileName());
+            var remoteFile = target.resolve(file.getFileName());
             @Cleanup InputStream inputStream = new FileInputStream(file.toFile());
             this.createDirectoryTree(target);
             this.throwWhenFalse(
-                    ftpClient.storeFile(remoteFile.toString(), inputStream),
+                    ftpClient.storeFile(remoteFile.getFileName().toString(), inputStream),
                     "Impossibile caricare il file sul server"
             );
+            response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
         } catch (FTPConnectionClosedException fce) {
             this.handleFTPConnectionClosedException();
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
@@ -153,9 +155,24 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
     }
 
     /**
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * A differenza di {@link #upload(Path, InputStream, Path)} il file viene caricato nella directory definita
+     * nella configurazione della sessione.
+     * @param file nome del file da caricare
+     * @param fileStream {@code InputStream} relativo al file da caricare sul server
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @see #upload(Path, InputStream, Path)
+     */
+    @Override
+    public FTPResponse upload(Path file, InputStream fileStream) {
+        return this.upload(file, fileStream, root);
+    }
+
+    /**
      * Carica il file indicato restituendo l'esito dell'operazione.
      * @param file nome del file da caricare
-     * @param fileStream {@code InputStream} realtivo al file da caricare sul server
+     * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @param target directory nella quale caricare il file
      * @throws IllegalStateException se la sessione non può essere utilizzata
      * @return l'esito della richiesta con gli eventuali messaggi di errore
@@ -167,14 +184,15 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
         var response = new FTPResponse();
         try {
             this.resetPosition();
-            var remoteFile = target.relativize(file.getFileName());
+            var remoteFile = target.resolve(file.getFileName());
             ftpClient.enterLocalPassiveMode();
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             this.createDirectoryTree(target);
             this.throwWhenFalse(
-                    ftpClient.storeFile(remoteFile.toString(), fileStream),
+                    ftpClient.storeFile(remoteFile.getFileName().toString(), fileStream),
                     "Impossibile caricare il file sul server"
             );
+            response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
         } catch (FTPConnectionClosedException fce) {
             this.handleFTPConnectionClosedException();
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
@@ -200,6 +218,7 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     ftpClient.deleteFile(file.toString()),
                     "Impossibile rimuovere il file dal server"
             );
+            response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
         } catch (FTPConnectionClosedException fce) {
             this.handleFTPConnectionClosedException();
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
@@ -225,6 +244,7 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     ftpClient.sendSiteCommand(command),
                     "Impossibile eseguire il comando fornito"
             );
+            response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
         } catch (FTPConnectionClosedException fce) {
             this.handleFTPConnectionClosedException();
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
@@ -259,18 +279,79 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
      */
     private void createDirectoryTree(Path target) throws IOException {
         for (Path path : target) {
-            if (path.equals(target.getFileName())) continue;
+            if (Files.isDirectory(path)) continue;
             if (!ftpClient.changeWorkingDirectory(path.toString())) {
                 this.throwWhenFalse(
                         ftpClient.makeDirectory(path.toString()),
                         "Impossibile creare la directory"
                 );
-                this.throwWhenFalse(
-                        ftpClient.changeWorkingDirectory(path.toString()),
-                        "Impossibile spostarsi nella directory"
-                );
+                this.changeWorkingDirectory(path);
             }
         }
+    }
+
+    /**
+     * Data la configurazione fornita tenta di inizializzare una connessione verso il server FTP.
+     * @param ftpConfiguration configurazione con la quale inizializzare il client
+     * @return {@link FTPClient} connesso alle coordinate fornite
+     * @throws UncheckedIOException se non è stato possibile trovare, connettersi o eseguire il login al server
+     */
+    private FTPClient createClientInstance(FTPConfiguration ftpConfiguration) {
+        var client = new FTPClient();
+        try {
+            client.connect(ftpConfiguration.getServer(), ftpConfiguration.getPort());
+            client.login(ftpConfiguration.getUsername(), ftpConfiguration.getPassword());
+        } catch (IOException ioe) {
+            throw new UncheckedIOException(
+                    String.format(
+                            "Non è stato possibile connettersi al server: (%s) %s",
+                            client.getReplyCode(), client.getReplyString()
+                    ),
+                    ioe
+            );
+        }
+        return client;
+    }
+
+    /**
+     * Data la configurazione fornita importa la root della sessione:<br>
+     * <ul>
+     *     <li>
+     *         se non è stata fornita alcuna preferenza di directory ({@link FTPConfiguration#getDirectory()})
+     *         viene restituita la directory scelta dal server FTP;
+     *     </li>
+     *     <li>
+     *         se è stata fornita una preferenza di directory ({@link FTPConfiguration#getDirectory()})
+     *         viene restituita quella directory e viene spostato il focus della sessione su di essa;
+     *     </li>
+     * </ul>
+     * @param ftpConfiguration configurazione fornita durante la creazione della sessione
+     * @return percorso definito come root della sessione
+     */
+    private Path getRoot(FTPConfiguration ftpConfiguration) {
+        try {
+            if (ftpConfiguration.getDirectory() != null) {
+                this.changeWorkingDirectory(configuration.getDirectory());
+                return configuration.getDirectory();
+            }
+            var root = Path.of("/");
+            configuration.setDirectory(root);
+            return root;
+        } catch (IOException ioe) {
+            throw new UncheckedIOException("Non è stato possibile connettersi al server", ioe);
+        }
+    }
+
+    /**
+     * Tenta di spostarsi nel percorso fornito.
+     * @param path percorso nel quale spostarsi
+     * @throws IOException se non è stato possibile spostarsi nel nuovo percorso
+     */
+    private void changeWorkingDirectory(Path path) throws IOException {
+        this.throwWhenFalse(
+                ftpClient.changeWorkingDirectory(path.toString()),
+                "Impossibile spostarsi nella directory"
+        );
     }
 
     /**

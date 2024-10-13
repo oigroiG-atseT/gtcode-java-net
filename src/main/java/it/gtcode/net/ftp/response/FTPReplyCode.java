@@ -1,6 +1,9 @@
 package it.gtcode.net.ftp.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import java.util.function.Predicate;
 
 /**
  * Rappresenta vari codici di stato del protocollo FTP.<br>
@@ -10,144 +13,211 @@ import lombok.AllArgsConstructor;
  * @author Giorgio Testa
  */
 @AllArgsConstructor
+@Getter
 public enum FTPReplyCode {
-
+    
     /**
-     * 425 - Impossibile aprire la connessione dati.
-     * Il server non è riuscito ad aprire una connessione dati per il trasferimento.
+     * 110: Il server ha riscontrato un marcatore di ripristino.
      */
-    CANNOT_OPEN_DATA_CONNECTION(425),
+    RESTART_MARKER(110),
     /**
-     * 426 - Trasferimento abortito.
-     * Il trasferimento dati è stato interrotto prima di essere completato.
+     * 120: Il servizio è al momento non disponibile.
      */
-    TRANSFER_ABORTED(426),
+    SERVICE_NOT_READY(120),
     /**
-     * 450 - Azione sul file non eseguita.
-     * Il server non è riuscito a eseguire l'azione richiesta sul file.
+     * 125: La connessione dati è già aperta e il trasferimento inizierà.
      */
-    FILE_ACTION_NOT_TAKEN(450),
+    DATA_CONNECTION_ALREADY_OPEN(125),
     /**
-     * 451 - Azione abortita.
-     * L'azione richiesta è stata abortita a causa di un errore imprevisto sul server.
+     * 150: Il file è in uno stato OK e il trasferimento inizierà.
      */
-    ACTION_ABORTED(451),
+    FILE_STATUS_OK(150),
     /**
-     * 452 - Memoria insufficiente.
-     * Il server non dispone di spazio sufficiente per eseguire l'operazione richiesta.
+     * 200: Il comando è stato eseguito con successo.
      */
-    INSUFFICIENT_STORAGE(452),
+    COMMAND_OK(200),
     /**
-     * 500 - Comando non riconosciuto.
-     * Il server non riconosce il comando inviato.
+     * 202: Il comando non è necessario o superfluo.
      */
-    UNRECOGNIZED_COMMAND(500),
+    COMMAND_IS_SUPERFLUOUS(202),
     /**
-     * 501 - Errore di sintassi negli argomenti.
-     * Il comando inviato contiene argomenti con errori di sintassi.
+     * 211: Stato del sistema o risposta allo stato corrente.
      */
-    SYNTAX_ERROR_IN_ARGUMENTS(501),
+    SYSTEM_STATUS(211),
     /**
-     * 502 - Comando non implementato.
-     * Il server non supporta il comando richiesto.
+     * 212: Stato della directory attuale.
      */
-    COMMAND_NOT_IMPLEMENTED(502),
+    DIRECTORY_STATUS(212),
     /**
-     * 503 - Sequenza di comandi errata.
-     * I comandi sono stati inviati in un ordine non valido.
+     * 213: Stato del file attuale.
      */
-    BAD_COMMAND_SEQUENCE(503),
+    FILE_STATUS(213),
     /**
-     * 504 - Comando non implementato per il parametro.
-     * Il comando è valido, ma non può essere eseguito con i parametri specificati.
+     * 214: Messaggio di aiuto, descrizione dei comandi disponibili.
      */
-    COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER(504),
+    HELP_MESSAGE(214),
     /**
-     * 530 - Non loggato.
-     * L'utente non è autenticato.
+     * 215: Tipo del sistema del server.
      */
-    NOT_LOGGED_IN(530),
+    NAME_SYSTEM_TYPE(215),
     /**
-     * 532 - Necessario account per salvare file.
-     * È richiesto un account per poter caricare o salvare file.
+     * 220: Il servizio è pronto per il nuovo utente.
      */
-    NEED_ACCOUNT_FOR_STORING_FILES(532),
+    SERVICE_READY(220),
     /**
-     * 550 - File non disponibile.
-     * Il file richiesto non è disponibile o non può essere accessibile.
+     * 221: Il servizio sta chiudendo la connessione di controllo.
      */
-    FILE_UNAVAILABLE(550),
+    SERVICE_CLOSING_CONTROL_CONNECTION(221),
     /**
-     * 551 - Tipo di pagina sconosciuto.
-     * Il tipo di pagina del file non è riconosciuto dal server.
+     * 225: La connessione dati è aperta; nessun trasferimento sta avvenendo.
      */
-    PAGE_TYPE_UNKNOWN(551),
+    DATA_CONNECTION_OPEN(225),
     /**
-     * 552 - Allocazione di memoria superata.
-     * L'allocazione di memoria richiesta per il file è stata superata.
+     * 226: Chiudendo la connessione dati; il trasferimento è stato completato con successo.
      */
-    STORAGE_ALLOCATION_EXCEEDED(552),
+    CLOSING_DATA_CONNECTION(226),
     /**
-     * 553 - Nome del file non consentito.
-     * Il nome del file fornito non è valido o non è consentito.
+     * 227: Entrando in modalità passiva.
      */
-    FILE_NAME_NOT_ALLOWED(553),
+    ENTERING_PASSIVE_MODE(227),
     /**
-     * 234 - Scambio di dati di sicurezza completato.
-     * Lo scambio di dati di sicurezza è stato completato con successo.
+     * 229: Entrando in modalità passiva estesa.
+     */
+    ENTERING_EPSV_MODE(229),
+    /**
+     * 230: Utente autenticato correttamente.
+     */
+    USER_LOGGED_IN(230),
+    /**
+     * 234: Lo scambio dati di sicurezza è completo.
      */
     SECURITY_DATA_EXCHANGE_COMPLETE(234),
     /**
-     * 235 - Scambio di dati di sicurezza avvenuto con successo.
-     * Lo scambio di dati di sicurezza è stato eseguito correttamente.
+     * 235: Scambio dati di sicurezza completato con successo.
      */
     SECURITY_DATA_EXCHANGE_SUCCESSFULLY(235),
     /**
-     * 334 - Meccanismo di sicurezza accettato.
-     * Il meccanismo di sicurezza proposto è stato accettato dal server.
+     * 250: L'azione richiesta sul file è stata completata con successo.
+     */
+    FILE_ACTION_OK(250),
+    /**
+     * 257: Il nome del percorso è stato creato.
+     */
+    PATHNAME_CREATED(257),
+    /**
+     * 331: Nome utente OK, ma è necessaria una password.
+     */
+    NEED_PASSWORD(331),
+    /**
+     * 332: È necessario un account per accedere al servizio.
+     */
+    NEED_ACCOUNT(332),
+    /**
+     * 334: Il meccanismo di sicurezza è accettabile.
      */
     SECURITY_MECHANISM_IS_OK(334),
     /**
-     * 335 - Dati di sicurezza accettabili.
-     * I dati di sicurezza forniti sono stati accettati dal server.
+     * 335: I dati di sicurezza forniti sono accettabili.
      */
     SECURITY_DATA_IS_ACCEPTABLE(335),
     /**
-     * 431 - Risorsa non disponibile.
-     * La risorsa richiesta non è attualmente disponibile.
+     * 350: L'azione richiesta è in sospeso, ulteriori informazioni sono necessarie.
+     */
+    FILE_ACTION_PENDING(350),
+    /**
+     * 421: Il servizio non è disponibile, chiusura della connessione di controllo.
+     */
+    SERVICE_NOT_AVAILABLE(421),
+    /**
+     * 425: Impossibile aprire la connessione dati.
+     */
+    CANNOT_OPEN_DATA_CONNECTION(425),
+    /**
+     * 426: La connessione è stata chiusa, il trasferimento è stato interrotto.
+     */
+    TRANSFER_ABORTED(426),
+    /**
+     * 431: Risorsa non disponibile o troppo occupata.
      */
     UNAVAILABLE_RESOURCE(431),
     /**
-     * 522 - Fallita la negoziazione TLS o crittografia dati richiesta.
-     * La negoziazione TLS è fallita, oppure è richiesta la crittografia dei dati.
+     * 450: Il file richiesto non è stato preso in considerazione.
      */
-    BAD_TLS_NEGOTIATION_OR_DATA_ENCRYPTION_REQUIRED(522),
+    FILE_ACTION_NOT_TAKEN(450),
     /**
-     * 533 - Negato per motivi di politica.
-     * L'azione richiesta è stata rifiutata per ragioni politiche o di sicurezza.
+     * 451: L'azione richiesta è stata interrotta a causa di un errore locale.
+     */
+    ACTION_ABORTED(451),
+    /**
+     * 452: Il server ha riscontrato un problema di spazio durante la richiesta.
+     */
+    INSUFFICIENT_STORAGE(452),
+    /**
+     * 500: Comando non riconosciuto.
+     */
+    UNRECOGNIZED_COMMAND(500),
+    /**
+     * 501: Errore di sintassi negli argomenti del comando.
+     */
+    SYNTAX_ERROR_IN_ARGUMENTS(501),
+    /**
+     * 502: Il comando non è implementato.
+     */
+    COMMAND_NOT_IMPLEMENTED(502),
+    /**
+     * 503: Sequenza di comandi errata.
+     */
+    BAD_COMMAND_SEQUENCE(503),
+    /**
+     * 504: Il comando non è implementato per il parametro specificato.
+     */
+    COMMAND_NOT_IMPLEMENTED_FOR_PARAMETER(504),
+    /**
+     * 530: Utente non autenticato, è necessario effettuare il login.
+     */
+    NOT_LOGGED_IN(530),
+    /**
+     * 532: È necessario un account per memorizzare i file.
+     */
+    NEED_ACCOUNT_FOR_STORING_FILES(532),
+    /**
+     * 533: Richiesta negata per motivi di policy.
      */
     DENIED_FOR_POLICY_REASONS(533),
     /**
-     * 534 - Richiesta negata.
-     * La richiesta è stata negata per motivi non specificati.
+     * 534: Richiesta negata per errore di verifica della sicurezza.
      */
-    REQUEST_DENIED(534),
+    FAILED_SECURITY_CHECK(534),
     /**
-     * 535 - Verifica di sicurezza fallita.
-     * La verifica dei dati di sicurezza è fallita.
+     * 535: Il livello di protezione richiesto non è supportato.
      */
-    FAILED_SECURITY_CHECK(535),
+    REQUESTED_PROT_LEVEL_NOT_SUPPORTED(535),
     /**
-     * 536 - Livello di protezione richiesto non supportato.
-     * Il livello di protezione richiesto non è supportato dal server.
+     * 550: Il file non è disponibile o non esiste.
      */
-    REQUESTED_PROT_LEVEL_NOT_SUPPORTED(536),
+    FILE_UNAVAILABLE(550),
     /**
-     * 522 - Fallimento nell'impostare la modalità di porta estesa.
-     * La modalità di porta estesa (EPSV) non è stata configurata correttamente.
+     * 551: Tipo di pagina sconosciuto.
      */
-    EXTENDED_PORT_FAILURE(522);
+    PAGE_TYPE_UNKNOWN(551),
+    /**
+     * 552: Spazio di archiviazione superato.
+     */
+    STORAGE_ALLOCATION_EXCEEDED(552),
+    /**
+     * 553: Nome del file non consentito.
+     */
+    FILE_NAME_NOT_ALLOWED(553),
+    /**
+     * 522: Fallimento esteso nella modalità PORT.
+     */
+    EXTENDED_PORT_FAILURE(522),
+    /**
+     * 522: Negoziazione TLS errata o crittografia dati richiesta.
+     */
+    BAD_TLS_NEGOTIATION_OR_DATA_ENCRYPTION_REQUIRED(522);
 
+    /** Valore numerico del {@link FTPReplyCode} */
     private final int code;
 
     /**
@@ -155,20 +225,14 @@ public enum FTPReplyCode {
      * @return il relativo stato di questo codice di risposta
      */
     public Status getStatus() {
-        if (this.code >= 500 && this.code < 600) return Status.NEGATIVE_PERMANENT;
-        else if (this.code >= 400 && this.code < 500) return Status.NEGATIVE_TRANSIENT;
-        else if (this.code >= 200 && this.code < 300) return Status.POSITIVE_COMPLETION;
-        else if (this.code >= 300 && this.code < 400) return Status.POSITIVE_INTERMEDIATE;
-        else if (this.code >= 100 && this.code < 200) return Status.POSITIVE_PRELIMINARY;
-        else if (this.code >= 600 && this.code < 700) return Status.PROTECTED_REPLY_CODE;
-        return null;
+        return Status.valueOfCode(this.code);
     }
 
     /**
      * Restituisce il {@link FTPReplyCode} associato al valore numerico fornito.
      * @param replyCode codice numerico di risposta del protocollo FTP
      * @throws IllegalArgumentException se il codice fornito non è tra quelli dichiarati
-     * @return il codice di risposta associato al valore numerico fornito
+     * @return il associato al valore numerico fornito
      */
     public static FTPReplyCode valueOfCode(int replyCode) {
         for (var value : values())
@@ -182,20 +246,37 @@ public enum FTPReplyCode {
      * @see FTPReplyCode
      * @author Giorgio Testa
      */
+    @AllArgsConstructor
     public enum Status {
 
         /** Indica un errore permanente, il client non deve ripetere la richiesta. */
-        NEGATIVE_PERMANENT,
+        NEGATIVE_PERMANENT((code) -> code >= 500 && code < 600),
         /** Indica un errore temporaneo, il client può riprovare la richiesta in un secondo momento. */
-        NEGATIVE_TRANSIENT,
+        NEGATIVE_TRANSIENT((code) -> code >= 400 && code < 500),
         /** Il comando è stato eseguito con successo e non sono richieste ulteriori azioni da parte del client. */
-        POSITIVE_COMPLETION,
+        POSITIVE_COMPLETION((code) -> code >= 200 && code < 300),
         /** Il comando è stato accettato ma il server attende ulteriori informazioni o comandi per completare l'operazione. */
-        POSITIVE_INTERMEDIATE,
+        POSITIVE_INTERMEDIATE((code) -> code >= 300 && code < 400),
         /**  Il server ha accettato il comando e inizierà l'azione richiesta, ma la risposta finale non è ancora disponibile. */
-        POSITIVE_PRELIMINARY,
-        /** Indica un codice di risposta che è protetto o soggetto a meccanismi di sicurezza. */
-        PROTECTED_REPLY_CODE;
+        POSITIVE_PRELIMINARY((code) -> code >= 100 && code < 200),
+        /** Indica un che è protetto o soggetto a meccanismi di sicurezza. */
+        PROTECTED_REPLY_CODE((code) -> code >= 600 && code < 700);
+
+        /** Vincolo di attribuzione dei codici */
+        private final Predicate<Integer> range;
+
+        /**
+         * Restituisce lo {@link Status} associato al valore numerico fornito.
+         * @param replyCode codice numerico di risposta del protocollo FTP
+         * @throws IllegalArgumentException se il codice fornito non è tra quelli dichiarati
+         * @return il associato al valore numerico fornito
+         */
+        public static Status valueOfCode(int replyCode) {
+            for (var value : values())
+                if (value.range.test(replyCode)) return value;
+            throw new IllegalArgumentException(String.format("Il codice %s non è tra quelli attualmente supportati", replyCode));
+        }
+
     }
 
 }

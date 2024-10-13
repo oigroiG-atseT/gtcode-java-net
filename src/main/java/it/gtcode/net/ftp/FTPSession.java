@@ -24,6 +24,12 @@ public interface FTPSession extends Closeable {
     boolean isOpen();
 
     /**
+     * Restituisce la configurazione con la quale è stata creata la sessione.
+     * @return la configurazione della sessione
+     */
+    FTPConfiguration getConfiguration();
+
+    /**
      * Restituisce il percorso con il quale è stata effettuata la connessione al server.
      * @return il percorso con il quale è stata effettuata la connessione al server
      */
@@ -42,6 +48,17 @@ public interface FTPSession extends Closeable {
 
     /**
      * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * A differenza di {@link #upload(Path, Path)} il file viene caricato nella directory definita nella configurazione
+     * della sessione.
+     * @param file file da caricare sul server
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @see #upload(Path, Path)
+     */
+    FTPResponse upload(Path file);
+
+    /**
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
      * A differenza di {@link #upload(Path, InputStream, Path)} l'{@code InputStream} viene creato e gestito direttamente
      * da questo metodo.
      * @param file file da caricare sul server
@@ -53,9 +70,21 @@ public interface FTPSession extends Closeable {
     FTPResponse upload(Path file, Path target);
 
     /**
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * A differenza di {@link #upload(Path, InputStream, Path)} il file viene caricato nella directory definita
+     * nella configurazione della sessione.
+     * @param file nome del file da caricare
+     * @param fileStream {@code InputStream} relativo al file da caricare sul server
+     * @throws IllegalStateException se la sessione non può essere utilizzata
+     * @return l'esito della richiesta con gli eventuali messaggi di errore
+     * @see #upload(Path, InputStream, Path)
+     */
+    FTPResponse upload(Path file, InputStream fileStream);
+
+    /**
      * Carica il file indicato restituendo l'esito dell'operazione.
      * @param file nome del file da caricare
-     * @param fileStream {@code InputStream} realtivo al file da caricare sul server
+     * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @param target directory nella quale caricare il file
      * @throws IllegalStateException se la sessione non può essere utilizzata
      * @return l'esito della richiesta con gli eventuali messaggi di errore

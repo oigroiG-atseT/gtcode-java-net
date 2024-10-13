@@ -46,8 +46,7 @@ public class FTPResponse extends GenericResponse {
      * @param exception eccezione risontrata
      */
     public void asError(int replyCode, String message, IOException exception) {
-        super.asError(message);
-        this.replyCode = FTPReplyCode.valueOfCode(replyCode);
+        this.asError(replyCode, message);
         this.exception = exception;
     }
 
