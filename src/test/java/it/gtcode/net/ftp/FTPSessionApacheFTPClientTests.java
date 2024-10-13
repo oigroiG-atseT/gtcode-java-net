@@ -37,7 +37,7 @@ class FTPSessionApacheFTPClientTests {
         return configuration;
     }
 
-    public static Map<String, String> FILES = Map.of(
+    public static final Map<String, String> FILES = Map.of(
             "toDownload.txt", "toDownload-1234567890",
             "toDelete.txt", "toDelete-1234567890"
     );

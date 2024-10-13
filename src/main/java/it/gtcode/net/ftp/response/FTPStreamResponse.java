@@ -28,7 +28,7 @@ public class FTPStreamResponse extends FTPResponse {
 
     /**
      * Restituisce l'{@link InputStream} rappresentante la risorsa richiesta al server.<br>
-     * E' compito dell'utilizzatore chiamare il metodo {@link #close()} per far avvenire un corretto rilascio delle risorse
+     * È compito dell'utilizzatore chiamare il metodo {@link #close()} per far avvenire un corretto rilascio delle risorse
      * sia del client che del server.<br>
      * Si consiglia l'utilizzo di {@link #consume(Consumer)} in quanto ne gestisce in automatico le risorse.
      * @return lo stream wrappato in un {@link Optional}
@@ -77,7 +77,7 @@ public class FTPStreamResponse extends FTPResponse {
     /**
      * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
-     * @param message messaggio testutale di risposta dal server
+     * @param message messaggio testuale di risposta dal server
      * @param stream stream della risorsa richiesta
      */
     public void asSuccess(int replyCode, String message, InputStream stream) {

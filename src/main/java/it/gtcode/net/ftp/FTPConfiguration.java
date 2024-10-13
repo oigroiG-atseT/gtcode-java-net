@@ -7,7 +7,7 @@ import lombok.Setter;
 import java.nio.file.Path;
 
 /**
- * Rappresenta la configurazione con la quale instaurare una connessione ad un server FTP.
+ * Rappresenta la configurazione con la quale instaurare una connessione a un server FTP.
  * @since 1.1
  * @author Giorgio Testa
  */

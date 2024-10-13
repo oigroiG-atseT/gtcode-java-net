@@ -9,7 +9,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Path;
 
 /**
- * Rappresenta una sessione istaurata tra un client ed un server FTP.<br>
+ * Rappresenta una sessione instaurata tra un client e un server FTP.<br>
  * Mette a disposizione vari metodi per eseguire varie operazioni di base come scambio e rimozione di file ed esecuzione di comandi.
  * @since 1.1
  * @author Giorgio Testa
@@ -18,7 +18,7 @@ public interface FTPSession extends Closeable {
 
     /**
      * Indica se questa {@link FTPSession} è aperta o meno.<br>
-     * Invocare metudi su una sessione chiusa comporta il fallimento automatico degli stessi.
+     * Invocare metodi su una sessione chiusa comporta il fallimento automatico degli stessi.
      * @return {@code true} e è aperta, {@code false} altrimenti
  */
     boolean isOpen();
@@ -37,10 +37,10 @@ public interface FTPSession extends Closeable {
 
     /**
      * Fornisce un {@link FTPStreamResponse} associato alla risorsa richiesta.<br>
-     * E' compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
-     * funzioni di utiliy per semplificare la consumazione della risorsa.
+     * È compito dell'utilizzatore chiudere lo stream una volta terminato l'utilizzo; la risposta restituita fornisce
+     * funzioni di utility per semplificare la consumazione della risorsa.
      * @param file file da richiedere al server
-     * @return un riferimento alla risorsa richiesta ed i relativi codici di risposta del server
+     * @return un riferimento alla risorsa richiesta e i relativi codici di risposta del server
      * @see FTPStreamResponse
      * @throws IllegalStateException se la sessione non può essere utilizzata
      */

@@ -32,7 +32,7 @@ public class FTPResponse extends GenericResponse {
     /**
      * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
-     * @param message messaggio testutale di risposta dal server
+     * @param message messaggio testuale di risposta dal server
      */
     public void asSuccess(int replyCode, String message) {
         super.asSuccess(message);
@@ -42,8 +42,8 @@ public class FTPResponse extends GenericResponse {
     /**
      * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
-     * @param message messaggio testutale di risposta dal server
-     * @param exception eccezione risontrata
+     * @param message messaggio testuale di risposta dal server
+     * @param exception eccezione riscontrata
      */
     public void asError(int replyCode, String message, IOException exception) {
         this.asError(replyCode, message);
@@ -53,7 +53,7 @@ public class FTPResponse extends GenericResponse {
     /**
      * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
-     * @param message messaggio testutale di risposta dal server
+     * @param message messaggio testuale di risposta dal server
      */
     public void asError(int replyCode, String message) {
         super.asError(message);
