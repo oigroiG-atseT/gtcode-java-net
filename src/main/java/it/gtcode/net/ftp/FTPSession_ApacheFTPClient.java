@@ -120,7 +120,7 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
      * @see #upload(Path, Path)
      */
     @Override
-    public FTPResponse upload(Path file) {
+    public FTPResponse upload(Path file) throws FileNotFoundException {
         return this.upload(file, root);
     }
 
@@ -135,7 +135,7 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
      * @see #upload(Path, InputStream, Path)
      */
     @Override
-    public FTPResponse upload(Path file, Path target) {
+    public FTPResponse upload(Path file, Path target) throws FileNotFoundException {
         this.canExecute();
         var response = new FTPResponse();
         try {
@@ -148,11 +148,11 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     "Impossibile caricare il file sul server"
             );
             response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
-        } catch (FTPConnectionClosedException fce) {
+        } catch (FTPConnectionClosedException | SocketException uce) {
             this.handleFTPConnectionClosedException();
-            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), uce);
         } catch (FileNotFoundException ffe) {
-            response.asError("Non è stato possibile trovare il file " + file.getFileName());
+            throw ffe;
         } catch (IOException ioe) {
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
         }
@@ -162,7 +162,8 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
     /**
      * Carica il file indicato restituendo l'esito dell'operazione.<br>
      * A differenza di {@link #upload(Path, InputStream, Path)} il file viene caricato nella directory definita
-     * nella configurazione della sessione.
+     * nella configurazione della sessione.<br>
+     * NOTA: Questo metodo <b>NON</b> chiude l'{@code InputStream} fornito.<br>
      * @param file nome del file da caricare
      * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @throws IllegalStateException se la sessione non può essere utilizzata
@@ -175,7 +176,8 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
     }
 
     /**
-     * Carica il file indicato restituendo l'esito dell'operazione.
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * NOTA: Questo metodo <b>NON</b> chiude l'{@code InputStream} fornito.<br>
      * @param file nome del file da caricare
      * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @param target directory nella quale caricare il file
@@ -196,9 +198,9 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     "Impossibile caricare il file sul server"
             );
             response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
-        } catch (FTPConnectionClosedException fce) {
+        } catch (FTPConnectionClosedException | SocketException uce) {
             this.handleFTPConnectionClosedException();
-            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), uce);
         } catch (IOException ioe) {
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
         }
@@ -222,9 +224,9 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     "Impossibile rimuovere il file dal server"
             );
             response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
-        } catch (FTPConnectionClosedException fce) {
+        } catch (FTPConnectionClosedException | SocketException uce) {
             this.handleFTPConnectionClosedException();
-            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), uce);
         } catch (IOException ioe) {
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
         }
@@ -248,9 +250,9 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
                     "Impossibile eseguire il comando fornito"
             );
             response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString());
-        } catch (FTPConnectionClosedException fce) {
+        } catch (FTPConnectionClosedException | SocketException uce) {
             this.handleFTPConnectionClosedException();
-            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), uce);
         } catch (IOException ioe) {
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
         }

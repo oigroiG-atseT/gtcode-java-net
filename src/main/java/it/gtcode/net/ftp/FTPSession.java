@@ -4,6 +4,7 @@ import it.gtcode.net.ftp.response.FTPResponse;
 import it.gtcode.net.ftp.response.FTPStreamResponse;
 
 import java.io.Closeable;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
@@ -51,11 +52,12 @@ public interface FTPSession extends Closeable {
      * A differenza di {@link #upload(Path, Path)} il file viene caricato nella directory definita nella configurazione
      * della sessione.
      * @param file file da caricare sul server
+     * @throws FileNotFoundException se non è stato possibile raggiungere il file da caricare
      * @throws IllegalStateException se la sessione non può essere utilizzata
      * @return l'esito della richiesta con gli eventuali messaggi di errore
      * @see #upload(Path, Path)
      */
-    FTPResponse upload(Path file);
+    FTPResponse upload(Path file) throws FileNotFoundException;
 
     /**
      * Carica il file indicato restituendo l'esito dell'operazione.<br>
@@ -63,16 +65,18 @@ public interface FTPSession extends Closeable {
      * da questo metodo.
      * @param file file da caricare sul server
      * @param target directory nella quale caricare il file
+     * @throws FileNotFoundException se non è stato possibile raggiungere il file da caricare
      * @throws IllegalStateException se la sessione non può essere utilizzata
      * @return l'esito della richiesta con gli eventuali messaggi di errore
      * @see #upload(Path, InputStream, Path)
      */
-    FTPResponse upload(Path file, Path target);
+    FTPResponse upload(Path file, Path target) throws FileNotFoundException;
 
     /**
      * Carica il file indicato restituendo l'esito dell'operazione.<br>
      * A differenza di {@link #upload(Path, InputStream, Path)} il file viene caricato nella directory definita
-     * nella configurazione della sessione.
+     * nella configurazione della sessione.<br>
+     * NOTA: Questo metodo <b>NON</b> chiude l'{@code InputStream} fornito.<br>
      * @param file nome del file da caricare
      * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @throws IllegalStateException se la sessione non può essere utilizzata
@@ -82,7 +86,8 @@ public interface FTPSession extends Closeable {
     FTPResponse upload(Path file, InputStream fileStream);
 
     /**
-     * Carica il file indicato restituendo l'esito dell'operazione.
+     * Carica il file indicato restituendo l'esito dell'operazione.<br>
+     * NOTA: Questo metodo <b>NON</b> chiude l'{@code InputStream} fornito.<br>
      * @param file nome del file da caricare
      * @param fileStream {@code InputStream} relativo al file da caricare sul server
      * @param target directory nella quale caricare il file

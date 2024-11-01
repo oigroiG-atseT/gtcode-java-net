@@ -14,6 +14,7 @@ import org.mockftpserver.fake.filesystem.FileEntry;
 import org.mockftpserver.fake.filesystem.FileSystem;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.SocketException;
@@ -351,6 +352,103 @@ class FTPSessionApacheFTPClientTests {
     }
 
     @Test
+    void upload_targetCreateDirectory() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            @Cleanup var session = new FTPSession_ApacheFTPClient(configuration);
+
+            FTPResponse response = session.upload(
+                    Path.of("src/test/resources/ftp/toUpload.txt"),
+                    Path.of("newDir/sub-newDir")
+            );
+
+            assertThat(response)
+                    .returns(null, FTPResponse::getException)
+                    .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+
+            assertThat(fakeFtpServer.getFileSystem().exists("/share/newDir/sub-newDir/toUpload.txt")).isTrue();
+
+        } catch (Exception e) {
+            fail("upload_targetCreateDirectory", e);
+        }
+    }
+
+    @Test
+    void upload_targetLocalFileNotFound() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            @Cleanup var session = new FTPSession_ApacheFTPClient(configuration);
+
+            assertThrows(
+                    FileNotFoundException.class,
+                    () -> session.upload(
+                            Path.of("src/test/resources/ftp/notFoundToUpload.txt"),
+                            Path.of("internal2/sub-internal")
+                    )
+            );
+
+        } catch (Exception e) {
+            fail("upload_targetLocalFileNotFound", e);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void upload_targetClosedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            FTPResponse response = session.upload(
+                    Path.of("src/test/resources/ftp/toUpload.txt"),
+                    Path.of("internal2/sub-internal")
+            );
+
+            assertThat(response)
+                    .returns(SocketException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+
+
+        } catch (Exception e) {
+            fail("upload_targetClosedConnection", e);
+        }
+    }
+
+    @Test
+    void upload_targetClosedSession() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+            session.close();
+
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> session.upload(
+                            Path.of("src/test/resources/ftp/toUpload.txt"),
+                            Path.of("internal2/sub-internal")
+                    )
+            );
+
+        } catch (Exception e) {
+            fail("upload_targetClosedSession", e);
+        }
+    }
+
+    @Test
     void upload_stream() {
         try {
 
@@ -405,6 +503,62 @@ class FTPSessionApacheFTPClientTests {
     }
 
     @Test
+    @SuppressWarnings("resource")
+    void upload_targetStreamClosedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            @Cleanup var stream = Files.newInputStream(Path.of("src/test/resources/ftp/toUpload.txt"));
+
+            FTPResponse response = session.upload(
+                    Path.of("toUploadStream.txt"),
+                    stream,
+                    Path.of("/internal2/sub-internal")
+            );
+
+            assertThat(response)
+                    .returns(SocketException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("upload_targetStreamClosedConnection", e);
+        }
+    }
+
+    @Test
+    void upload_targetStreamClosedSession() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+            session.close();
+
+            @Cleanup var stream = Files.newInputStream(Path.of("src/test/resources/ftp/toUpload.txt"));
+
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> session.upload(
+                            Path.of("toUploadStream.txt"),
+                            stream,
+                            Path.of("/internal2/sub-internal")
+                    )
+            );
+
+        } catch (Exception e) {
+            fail("upload_targetStreamClosedSession", e);
+        }
+    }
+
+    @Test
     void delete() {
         try {
 
@@ -423,6 +577,70 @@ class FTPSessionApacheFTPClientTests {
 
         } catch (Exception e) {
             fail("delete", e);
+        }
+    }
+
+    @Test
+    void delete_fileNotFound() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            @Cleanup var session = new FTPSession_ApacheFTPClient(configuration);
+
+            FTPResponse response = session.delete(Path.of("notFoundToDelete.txt"));
+
+            assertThat(response)
+                    .returns(IOException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("delete_fileNotFound", e);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void delete_closedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            FTPResponse response = session.delete(Path.of("toDelete.txt"));
+
+            assertThat(response)
+                    .returns(SocketException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("delete_closedConnection", e);
+        }
+    }
+
+    @Test
+    void delete_closedSession() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+            session.close();
+
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> session.delete(Path.of("toDelete.txt"))
+            );
+
+        } catch (Exception e) {
+            fail("delete_closedSession", e);
         }
     }
 
@@ -447,6 +665,50 @@ class FTPSessionApacheFTPClientTests {
     }
 
     @Test
+    @SuppressWarnings("resource")
+    void execute_closedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            FTPResponse response = session.execute("chmod 777 internal/toDownload.txt");
+
+            assertThat(response)
+                    .returns(SocketException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("execute_closedConnection", e);
+        }
+    }
+
+    @Test
+    void execute_closedSession() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+            session.close();
+
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> session.execute("chmod 777 internal/toDownload.txt")
+            );
+
+        } catch (Exception e) {
+            fail("execute_closedSession", e);
+        }
+    }
+
+    @Test
     void close() {
         try {
 
@@ -462,6 +724,29 @@ class FTPSessionApacheFTPClientTests {
 
         } catch (Exception e) {
             fail("close", e);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void close_closedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            assertThrows(
+                    UncheckedIOException.class,
+                    session::close
+            );
+
+        } catch (Exception e) {
+            fail("close_closedConnection", e);
         }
     }
 
