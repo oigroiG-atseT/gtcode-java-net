@@ -15,11 +15,14 @@ import org.mockftpserver.fake.filesystem.FileSystem;
 import org.mockftpserver.fake.filesystem.UnixFakeFileSystem;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
@@ -37,10 +40,28 @@ class FTPSessionApacheFTPClientTests {
         return configuration;
     }
 
+    FTPConfiguration getScopedConfiguration() {
+        var configuration = new FTPConfiguration();
+        configuration.setServer("localhost");
+        configuration.setDirectory(null);
+        configuration.setPort(22);
+        configuration.setUsername("username");
+        configuration.setPassword("password");
+        return configuration;
+    }
+
     public static final Map<String, String> FILES = Map.of(
             "toDownload.txt", "toDownload-1234567890",
             "toDelete.txt", "toDelete-1234567890"
     );
+
+    public FakeFtpServer getScopedFTPServer() {
+        var fakeFtpServer = new FakeFtpServer();
+        fakeFtpServer.setServerControlPort(22);
+        fakeFtpServer.addUserAccount(new UserAccount("username", "password", "/"));
+        fakeFtpServer.setFileSystem(new UnixFakeFileSystem());
+        return fakeFtpServer;
+    }
 
     @BeforeAll
     public static void beforeAll() {
@@ -82,6 +103,28 @@ class FTPSessionApacheFTPClientTests {
     }
 
     @Test
+    @SuppressWarnings("resource")
+    void FTPSession_ApacheFTPClient__configuration_fail() {
+        try {
+
+            var badConfiguration = new FTPConfiguration();
+            badConfiguration.setServer("localhost");
+            badConfiguration.setDirectory(null);
+            badConfiguration.setPort(23);
+            badConfiguration.setUsername("username");
+            badConfiguration.setPassword("");
+
+            assertThrows(
+                    UncheckedIOException.class,
+                    () -> new FTPSession_ApacheFTPClient(badConfiguration)
+            );
+
+        } catch (Exception e) {
+            fail("FTPSession_ApacheFTPClient__configuration_fail", e);
+        }
+    }
+
+    @Test
     void FTPSession_ApacheFTPClient__configurationWithDirectory() {
         try {
 
@@ -97,6 +140,25 @@ class FTPSessionApacheFTPClientTests {
 
         } catch (Exception e) {
             fail("FTPSession_ApacheFTPClient__configurationWithDirectory", e);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void FTPSession_ApacheFTPClient__configurationWithDirectory_fail() {
+        try {
+
+            Path expectedRoot = Path.of("unknown/directory");
+
+            var badConfiguration = this.getBaseConfiguration(expectedRoot.toString());
+
+            assertThrows(
+                    UncheckedIOException.class,
+                    () -> new FTPSession_ApacheFTPClient(badConfiguration)
+            );
+
+        } catch (Exception e) {
+            fail("FTPSession_ApacheFTPClient__configurationWithDirectory_fail", e);
         }
     }
 
@@ -174,6 +236,70 @@ class FTPSessionApacheFTPClientTests {
 
         } catch (Exception e) {
             fail("download", e);
+        }
+    }
+
+    @Test
+    void download_fileNotFound() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            @Cleanup var session = new FTPSession_ApacheFTPClient(configuration);
+
+            FTPStreamResponse response = session.download(Path.of("unknown/unknownFileToDownload.txt"));
+
+            assertThat(response)
+                    .returns(IOException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPStreamResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("download_fileNotFound", e);
+        }
+    }
+
+    @Test
+    @SuppressWarnings("resource")
+    void download_closedConnection() {
+        try {
+
+            var configuration = this.getScopedConfiguration();
+            var server = this.getScopedFTPServer();
+            server.start();
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+
+            server.stop();
+
+            FTPStreamResponse response = session.download(Path.of("internal/toDownload.txt"));
+
+            assertThat(response)
+                    .returns(SocketException.class, (item) -> item.getException().getClass())
+                    .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
+                    .returns(BasicStatus.ERROR, FTPStreamResponse::getStatus);
+
+        } catch (Exception e) {
+            fail("download", e);
+        }
+    }
+
+    @Test
+    void download_closedSession() {
+        try {
+
+            var configuration = this.getBaseConfiguration(null);
+
+            var session = new FTPSession_ApacheFTPClient(configuration);
+            session.close();
+
+            assertThrows(
+                    IllegalStateException.class,
+                    () -> session.download(Path.of("internal/toDownload.txt"))
+            );
+
+        } catch (Exception e) {
+            fail("download_closedSession", e);
         }
     }
 

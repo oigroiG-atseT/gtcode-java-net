@@ -249,16 +249,16 @@ public enum FTPReplyCode {
     @AllArgsConstructor
     public enum Status {
 
-        /** Indica un errore permanente, il client non deve ripetere la richiesta. */
-        NEGATIVE_PERMANENT((code) -> code >= 500 && code < 600),
-        /** Indica un errore temporaneo, il client può riprovare la richiesta in un secondo momento. */
-        NEGATIVE_TRANSIENT((code) -> code >= 400 && code < 500),
+        /**  Il server ha accettato il comando e inizierà l'azione richiesta, ma la risposta finale non è ancora disponibile. */
+        POSITIVE_PRELIMINARY((code) -> code >= 100 && code < 200),
         /** Il comando è stato eseguito con successo e non sono richieste ulteriori azioni da parte del client. */
         POSITIVE_COMPLETION((code) -> code >= 200 && code < 300),
         /** Il comando è stato accettato ma il server attende ulteriori informazioni o comandi per completare l'operazione. */
         POSITIVE_INTERMEDIATE((code) -> code >= 300 && code < 400),
-        /**  Il server ha accettato il comando e inizierà l'azione richiesta, ma la risposta finale non è ancora disponibile. */
-        POSITIVE_PRELIMINARY((code) -> code >= 100 && code < 200),
+        /** Indica un errore temporaneo, il client può riprovare la richiesta in un secondo momento. */
+        NEGATIVE_TRANSIENT((code) -> code >= 400 && code < 500),
+        /** Indica un errore permanente, il client non deve ripetere la richiesta. */
+        NEGATIVE_PERMANENT((code) -> code >= 500 && code < 600),
         /** Indica un che è protetto o soggetto a meccanismi di sicurezza. */
         PROTECTED_REPLY_CODE((code) -> code >= 600 && code < 700);
 

@@ -9,6 +9,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPConnectionClosedException;
 
 import java.io.*;
+import java.net.SocketException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -95,10 +96,14 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
         try {
             this.resetPosition();
             InputStream fileInputStream = ftpClient.retrieveFileStream(file.toString());
+            this.throwWhenFalse(
+                    fileInputStream != null,
+                    "Non è stato possibile connettersi al file"
+            );
             response.asSuccess(ftpClient.getReplyCode(), ftpClient.getReplyString(), fileInputStream);
-        } catch (FTPConnectionClosedException fce) {
+        } catch (FTPConnectionClosedException | SocketException uce) {
             this.handleFTPConnectionClosedException();
-            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), fce);
+            response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), uce);
         } catch (IOException ioe) {
             response.asError(ftpClient.getReplyCode(), ftpClient.getReplyString(), ioe);
         }
@@ -185,8 +190,6 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
         try {
             this.resetPosition();
             var remoteFile = target.resolve(file.getFileName());
-            ftpClient.enterLocalPassiveMode();
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             this.createDirectoryTree(target);
             this.throwWhenFalse(
                     ftpClient.storeFile(remoteFile.getFileName().toString(), fileStream),
@@ -301,6 +304,8 @@ public class FTPSession_ApacheFTPClient implements FTPSession {
         try {
             client.connect(ftpConfiguration.getServer(), ftpConfiguration.getPort());
             client.login(ftpConfiguration.getUsername(), ftpConfiguration.getPassword());
+            client.enterLocalPassiveMode();
+            client.setFileType(FTP.BINARY_FILE_TYPE);
         } catch (IOException ioe) {
             throw new UncheckedIOException(
                     String.format(

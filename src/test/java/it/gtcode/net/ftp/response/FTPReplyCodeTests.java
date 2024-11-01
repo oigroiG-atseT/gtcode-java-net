@@ -31,12 +31,20 @@ class FTPReplyCodeTests {
     void Status_valueOfCode_unknownCode() {
         try {
 
-            var replyCode = 0;
+            var replyCode1 = 0;
 
             assertThrows(
                     IllegalArgumentException.class,
-                    () -> FTPReplyCode.Status.valueOfCode(replyCode),
+                    () -> FTPReplyCode.Status.valueOfCode(replyCode1),
                     "Il codice 0 non è tra quelli attualmente supportati"
+            );
+
+            var replyCode2 = 800;
+
+            assertThrows(
+                    IllegalArgumentException.class,
+                    () -> FTPReplyCode.Status.valueOfCode(replyCode2),
+                    "Il codice 800 non è tra quelli attualmente supportati"
             );
 
         } catch (Exception e) {
