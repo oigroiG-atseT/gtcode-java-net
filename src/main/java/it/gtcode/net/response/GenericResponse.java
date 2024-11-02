@@ -8,7 +8,7 @@ import lombok.Setter;
  * Implementazione di {@code Response}.<br>
  * Rappresenta una risposta generica contenente solamente l'esito e un eventuale
  * messaggio di risposta.<br>
- * Per indicare lo stato della risposta viene utilizzata l'enum {@link BasicStatus}.
+ * Per indicare lo stato della risposta viene utilizzata la enum {@link BasicStatus}.
  * @since 1.0
  * @see Status
  * @see BasicStatus
@@ -32,7 +32,7 @@ public class GenericResponse implements Response {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} ed il messaggio fornito.
+     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e il messaggio fornito.
      * @param message messaggio di risposta
      */
     @Override
@@ -50,7 +50,7 @@ public class GenericResponse implements Response {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} ed il messaggio fornito.
+     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e il messaggio fornito.
      * @param message messaggio di risposta
      */
     @Override

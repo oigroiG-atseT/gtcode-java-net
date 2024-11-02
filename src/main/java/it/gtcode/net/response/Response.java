@@ -1,8 +1,8 @@
 package it.gtcode.net.response;
 
 /**
- * La risposta di una richiesta o operazione effettuata attraverso uno dei protocolli di rete supportati dalla libreria.<br>
- * Offre metodi di utiliy per semplificare la gestione delle classi implementanti quest'interfaccia.
+ * La risposta di una richiesta od operazione effettuata attraverso uno dei protocolli di rete supportati dalla libreria.<br>
+ * Offre metodi di utility per semplificare la gestione delle classi implementanti quest'interfaccia.
  * @author Giorgio Testa
  * @see GenericResponse
  * @see Status

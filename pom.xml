@@ -11,7 +11,7 @@
 
     <groupId>io.github.oigroig-atset</groupId>
     <artifactId>gtcode-net</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Libreria dedicata alla semplificazione dello scambio di risorse utilizzando varie tipologie di protocolli.</description>
@@ -70,7 +70,22 @@
             <version>3.26.3</version>
             <scope>test</scope>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockftpserver/MockFtpServer -->
+        <dependency>
+            <groupId>org.mockftpserver</groupId>
+            <artifactId>MockFtpServer</artifactId>
+            <version>3.2.0</version>
+            <scope>test</scope>
+        </dependency>
         <!--#endregion DEVELOPMENT -->
+
+        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.11.1</version>
+        </dependency>
+
     </dependencies>
 
     <build>
