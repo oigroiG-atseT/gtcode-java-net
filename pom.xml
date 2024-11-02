@@ -11,7 +11,7 @@
 
     <groupId>io.github.oigroig-atset</groupId>
     <artifactId>gtcode-net</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Libreria dedicata alla semplificazione dello scambio di risorse utilizzando varie tipologie di protocolli.</description>
