@@ -11,6 +11,20 @@ package it.gtcode.net.response;
 public interface Response {
 
     /**
+     * Ottiene lo stato della risposta.
+     * @return {@link Status}
+     * @since 2.0
+     */
+    Status getStatus();
+
+    /**
+     * Ottiene l'eventuale messaggio di risposta.
+     * @return {@link String}
+     * @since 2.0
+     */
+    String getMessage();
+
+    /**
      * Indica che questa risposta deve rappresentare un esito positivo contenente il messaggio fornito.
      * @param message messaggio di risposta
      */

@@ -11,7 +11,7 @@
 
     <groupId>io.github.oigroig-atset</groupId>
     <artifactId>gtcode-net</artifactId>
-    <version>1.1.0</version>
+    <version>2.0.0</version>
     <packaging>jar</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Libreria dedicata alla semplificazione dello scambio di risorse utilizzando varie tipologie di protocolli.</description>
@@ -75,6 +75,13 @@
             <groupId>org.mockftpserver</groupId>
             <artifactId>MockFtpServer</artifactId>
             <version>3.2.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.18.1</version>
             <scope>test</scope>
         </dependency>
         <!--#endregion DEVELOPMENT -->

@@ -1,6 +1,6 @@
 package it.gtcode.net.ftp.response;
 
-import it.gtcode.net.response.BasicStatus;
+import it.gtcode.net.response.Status;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -23,7 +23,7 @@ class FTPStreamResponseTests {
     void asSuccess_codeMessageStream() {
         try {
 
-            var expectedStatus = BasicStatus.SUCCESS;
+            var expectedStatus = Status.SUCCESS;
             var expectedReplyCode = FTPReplyCode.COMMAND_OK;
             var expectedMessage = "COMMAND OK";
             var expectedStream = InputStream.nullInputStream();

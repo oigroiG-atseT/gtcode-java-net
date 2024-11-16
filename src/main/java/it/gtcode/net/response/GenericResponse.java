@@ -1,70 +1,88 @@
 package it.gtcode.net.response;
 
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.Setter;
 
 /**
  * Implementazione di {@code Response}.<br>
  * Rappresenta una risposta generica contenente solamente l'esito e un eventuale
  * messaggio di risposta.<br>
- * Per indicare lo stato della risposta viene utilizzata la enum {@link BasicStatus}.
+ * Per indicare lo stato della risposta viene utilizzata la enum {@link Status}.
  * @since 1.0
  * @see Status
- * @see BasicStatus
  * @see SingleResponse
  * @see ListResponse
  * @author Giorgio Testa
  */
+@Setter
 @EqualsAndHashCode
-@Getter@Setter
 public class GenericResponse implements Response {
 
     private Status status;
     private String message;
 
     /**
-     * Costruttore di base. Un oggetto appena creato ha {@code status} valorizzato a {@link BasicStatus#UNKNOWN}.
+     * Costruttore di base. Un oggetto appena creato ha {@code status} valorizzato a {@link Status#UNKNOWN}.
      */
     public GenericResponse() {
-        this.status = BasicStatus.UNKNOWN;
-        this.message = BasicStatus.UNKNOWN.getMessage();
+        this.status = Status.UNKNOWN;
+        this.message = Status.UNKNOWN.getMessage();
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e il messaggio fornito.
+     * Ottiene lo stato della risposta.
+     * @return {@link Status}
+     * @since 2.0
+     */
+    @Override
+    public Status getStatus() {
+        return this.status;
+    }
+
+    /**
+     * Ottiene l'eventuale messaggio di risposta.
+     * @return {@link String}
+     * @since 2.0
+     */
+    @Override
+    public String getMessage() {
+        return this.message;
+    }
+
+    /**
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e il messaggio fornito.
      * @param message messaggio di risposta
      */
     @Override
     public void asSuccess(String message) {
-        this.status = BasicStatus.SUCCESS;
+        this.status = Status.SUCCESS;
         this.message = message;
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS}
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS}
      */
     @Override
     public void asSuccess() {
-        this.asSuccess(BasicStatus.SUCCESS.getMessage());
+        this.asSuccess(Status.SUCCESS.getMessage());
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e il messaggio fornito.
+     * Inizializza la risposta con lo stato {@link Status#ERROR} e il messaggio fornito.
      * @param message messaggio di risposta
      */
     @Override
     public void asError(String message) {
-        this.status = BasicStatus.ERROR;
+        this.status = Status.ERROR;
         this.message = message;
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e con il relativo messaggio di errore.
+     * Inizializza la risposta con lo stato {@link Status#ERROR} e con il relativo messaggio di errore.
      */
     @Override
     public void asError() {
-        this.asError(BasicStatus.ERROR.getMessage());
+        this.asError(Status.ERROR.getMessage());
     }
 
 }

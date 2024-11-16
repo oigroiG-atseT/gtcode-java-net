@@ -1,6 +1,6 @@
 package it.gtcode.net.ftp.response;
 
-import it.gtcode.net.response.BasicStatus;
+import it.gtcode.net.response.Status;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -18,7 +18,7 @@ class FTPResponseTests {
         try {
 
             var expected = new FTPResponse();
-            expected.setStatus(BasicStatus.SUCCESS);
+            expected.setStatus(Status.SUCCESS);
             expected.setReplyCode(FTPReplyCode.SECURITY_DATA_EXCHANGE_COMPLETE);
             expected.setMessage("SECURITY DATA EXCHANGE COMPLETED");
 
@@ -38,7 +38,7 @@ class FTPResponseTests {
         try {
 
             var expected = new FTPResponse();
-            expected.setStatus(BasicStatus.ERROR);
+            expected.setStatus(Status.ERROR);
             expected.setReplyCode(FTPReplyCode.UNAVAILABLE_RESOURCE);
             expected.setMessage("UNAVAILABLE RESOURCE");
 
@@ -58,7 +58,7 @@ class FTPResponseTests {
         try {
 
             var expected = new FTPResponse();
-            expected.setStatus(BasicStatus.ERROR);
+            expected.setStatus(Status.ERROR);
             expected.setReplyCode(FTPReplyCode.UNAVAILABLE_RESOURCE);
             expected.setMessage("UNAVAILABLE RESOURCE");
             expected.setException(new IOException("asError_codeMessageException"));

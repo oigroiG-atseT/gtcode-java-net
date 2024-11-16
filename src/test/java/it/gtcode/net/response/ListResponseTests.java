@@ -1,5 +1,7 @@
 package it.gtcode.net.response;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -31,7 +33,7 @@ class ListResponseTests {
         try {
 
             var expected = new ListResponse<String>();
-            expected.setStatus(BasicStatus.SUCCESS);
+            expected.setStatus(Status.SUCCESS);
             expected.setMessage(null);
             expected.setItems(List.of("A", "B", "C"));
 
@@ -43,6 +45,32 @@ class ListResponseTests {
 
         } catch (Exception e) {
             fail("asSuccess_list", e);
+        }
+    }
+
+    @Test
+    void MustBeJsonSerializable() {
+        try {
+
+            var response = new ListResponse<String>();
+            response.setStatus(Status.ERROR);
+            response.setMessage(Status.ERROR.getMessage());
+            response.setItems(List.of("A", "B", "C"));
+
+            var objectMapper = new ObjectMapper();
+            var serialized = objectMapper.writeValueAsString(response);
+
+            assertThat(serialized)
+                    .contains("\"status\":\"ERROR\"")
+                    .contains("\"message\":\"Errore dal server\"")
+                    .contains("\"items\":[");
+
+            var deserialized = objectMapper.readValue(serialized, new TypeReference<ListResponse<String>>() {});
+
+            assertThat(deserialized).isEqualTo(response);
+
+        } catch (Exception e) {
+            fail("MustBeJsonSerializable", e);
         }
     }
 

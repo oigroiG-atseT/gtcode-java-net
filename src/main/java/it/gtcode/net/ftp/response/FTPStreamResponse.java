@@ -1,6 +1,6 @@
 package it.gtcode.net.ftp.response;
 
-import it.gtcode.net.response.BasicStatus;
+import it.gtcode.net.response.Status;
 import lombok.EqualsAndHashCode;
 
 import java.io.IOException;
@@ -75,7 +75,7 @@ public class FTPStreamResponse extends FTPResponse {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e gli oggetti forniti.
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
      * @param message messaggio testuale di risposta dal server
      * @param stream stream della risorsa richiesta
