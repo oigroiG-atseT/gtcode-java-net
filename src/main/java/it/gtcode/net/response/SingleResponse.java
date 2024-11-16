@@ -23,7 +23,6 @@ public class SingleResponse<T> extends GenericResponse {
     /**
      * Ottiene l'oggetto contenuto nella risposta.
      * @return l'oggetto contenuto wrappato in un {@linkplain Optional}
-     * @see #getItem()
      * @since 2.0
      */
     public Optional<T> extractItem() {
