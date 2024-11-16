@@ -1,7 +1,9 @@
 package it.gtcode.net.response;
 
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.Optional;
 
@@ -13,7 +15,7 @@ import java.util.Optional;
  * @author Giorgio Testa
  */
 @EqualsAndHashCode(callSuper = true)
-@Setter
+@Getter@Setter @ToString(callSuper = true)
 public class SingleResponse<T> extends GenericResponse {
 
     private T item;
@@ -21,13 +23,15 @@ public class SingleResponse<T> extends GenericResponse {
     /**
      * Ottiene l'oggetto contenuto nella risposta.
      * @return l'oggetto contenuto wrappato in un {@linkplain Optional}
+     * @see #getItem()
+     * @since 2.0
      */
-    public Optional<T> getItem() {
+    public Optional<T> extractItem() {
         return Optional.ofNullable(item);
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e l'oggetto fornito.<br>
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e l'oggetto fornito.<br>
      * <p>
      * NOTA:<br>
      * questo metodo è stato chiamato in maniera differente dagli altri {@code asSuccess} poiché se impostato a

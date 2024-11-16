@@ -3,7 +3,7 @@ package it.gtcode.net.ftp;
 import it.gtcode.net.ftp.response.FTPReplyCode;
 import it.gtcode.net.ftp.response.FTPResponse;
 import it.gtcode.net.ftp.response.FTPStreamResponse;
-import it.gtcode.net.response.BasicStatus;
+import it.gtcode.net.response.Status;
 import lombok.Cleanup;
 import org.apache.commons.net.ftp.FTPClient;
 import org.junit.jupiter.api.*;
@@ -231,7 +231,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPStreamResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_PRELIMINARY, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPStreamResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPStreamResponse::getStatus);
 
             response.consume(stream -> assertThat(stream).hasBinaryContent(FILES.get("toDownload.txt").getBytes()));
 
@@ -253,7 +253,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(IOException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPStreamResponse::getStatus);
+                    .returns(Status.ERROR, FTPStreamResponse::getStatus);
 
         } catch (Exception e) {
             fail("download_fileNotFound", e);
@@ -278,7 +278,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(SocketException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPStreamResponse::getStatus);
+                    .returns(Status.ERROR, FTPStreamResponse::getStatus);
 
         } catch (Exception e) {
             fail("download", e);
@@ -317,7 +317,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/toUpload.txt")).isTrue();
 
@@ -342,7 +342,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/internal2/sub-internal/toUpload.txt")).isTrue();
 
@@ -367,7 +367,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/newDir/sub-newDir/toUpload.txt")).isTrue();
 
@@ -418,7 +418,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(SocketException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+                    .returns(Status.ERROR, FTPResponse::getStatus);
 
 
         } catch (Exception e) {
@@ -465,7 +465,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/toUploadStream.txt")).isTrue();
 
@@ -493,7 +493,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/internal2/sub-internal/toUploadStream.txt")).isTrue();
 
@@ -526,7 +526,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(SocketException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+                    .returns(Status.ERROR, FTPResponse::getStatus);
 
         } catch (Exception e) {
             fail("upload_targetStreamClosedConnection", e);
@@ -571,7 +571,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
             assertThat(fakeFtpServer.getFileSystem().exists("/share/toDelete.txt")).isFalse();
 
@@ -593,7 +593,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(IOException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+                    .returns(Status.ERROR, FTPResponse::getStatus);
 
         } catch (Exception e) {
             fail("delete_fileNotFound", e);
@@ -618,7 +618,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(SocketException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+                    .returns(Status.ERROR, FTPResponse::getStatus);
 
         } catch (Exception e) {
             fail("delete_closedConnection", e);
@@ -657,7 +657,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(null, FTPResponse::getException)
                     .returns(FTPReplyCode.Status.POSITIVE_COMPLETION, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.SUCCESS, FTPResponse::getStatus);
+                    .returns(Status.SUCCESS, FTPResponse::getStatus);
 
         } catch (Exception e) {
             fail("execute", e);
@@ -682,7 +682,7 @@ class FTPSessionApacheFTPClientTests {
             assertThat(response)
                     .returns(SocketException.class, (item) -> item.getException().getClass())
                     .returns(FTPReplyCode.Status.NEGATIVE_PERMANENT, (item) -> item.getReplyCode().getStatus())
-                    .returns(BasicStatus.ERROR, FTPResponse::getStatus);
+                    .returns(Status.ERROR, FTPResponse::getStatus);
 
         } catch (Exception e) {
             fail("execute_closedConnection", e);

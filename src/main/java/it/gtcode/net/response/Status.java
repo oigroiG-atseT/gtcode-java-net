@@ -1,18 +1,24 @@
 package it.gtcode.net.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 /**
  * Rappresenta un possibile stato di una {@code Response}.
  * @since 1.0
- * @see Response
- * @see BasicStatus
  * @author Giorgio Testa
  */
-public interface Status {
+@Getter
+@AllArgsConstructor
+public enum Status {
 
-    /**
-     * Ottiene il messaggio di default dichiarato nello stato.
-     * @return il messaggio dichiarato nello stato
-     */
-    String getMessage();
+    /** Rappresenta uno stato non definito */
+    UNKNOWN(null),
+    /** Rappresenta un esito positivo. */
+    SUCCESS(null),
+    /** Rappresenta un esito negativo. */
+    ERROR("Errore dal server");
+
+    private final String message;
 
 }

@@ -1,5 +1,7 @@
 package it.gtcode.net.response;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -15,8 +17,8 @@ class GenericResponseTests {
         try {
 
             var expected = new GenericResponse();
-            expected.setStatus(BasicStatus.UNKNOWN);
-            expected.setMessage(BasicStatus.UNKNOWN.getMessage());
+            expected.setStatus(Status.UNKNOWN);
+            expected.setMessage(Status.UNKNOWN.getMessage());
 
             Response response = new GenericResponse();
 
@@ -32,7 +34,7 @@ class GenericResponseTests {
         try {
 
             var expected = new GenericResponse();
-            expected.setStatus(BasicStatus.SUCCESS);
+            expected.setStatus(Status.SUCCESS);
             expected.setMessage("SUCCESSO");
 
             Response response = new GenericResponse();
@@ -51,7 +53,7 @@ class GenericResponseTests {
         try {
 
             var expected = new GenericResponse();
-            expected.setStatus(BasicStatus.SUCCESS);
+            expected.setStatus(Status.SUCCESS);
             expected.setMessage(null);
 
             Response response = new GenericResponse();
@@ -70,7 +72,7 @@ class GenericResponseTests {
         try {
 
             var expected = new GenericResponse();
-            expected.setStatus(BasicStatus.ERROR);
+            expected.setStatus(Status.ERROR);
             expected.setMessage("ERRORE");
 
             Response response = new GenericResponse();
@@ -89,8 +91,8 @@ class GenericResponseTests {
         try {
 
             var expected = new GenericResponse();
-            expected.setStatus(BasicStatus.ERROR);
-            expected.setMessage(BasicStatus.ERROR.getMessage());
+            expected.setStatus(Status.ERROR);
+            expected.setMessage(Status.ERROR.getMessage());
 
             Response response = new GenericResponse();
 
@@ -100,6 +102,30 @@ class GenericResponseTests {
 
         } catch (Exception e) {
             fail("asError", e);
+        }
+    }
+
+    @Test
+    void MustBeJsonSerializable() {
+        try {
+
+            var response = new GenericResponse();
+            response.setStatus(Status.ERROR);
+            response.setMessage(Status.ERROR.getMessage());
+
+            var objectMapper = new ObjectMapper();
+            var serialized = objectMapper.writeValueAsString(response);
+
+            assertThat(serialized)
+                    .contains("\"status\":\"ERROR\"")
+                    .contains("\"message\":\"Errore dal server\"");
+
+            var deserialized = objectMapper.readValue(serialized, new TypeReference<GenericResponse>() {});
+
+            assertThat(deserialized).isEqualTo(response);
+
+        } catch (Exception e) {
+            fail("MustBeJsonSerializable", e);
         }
     }
 

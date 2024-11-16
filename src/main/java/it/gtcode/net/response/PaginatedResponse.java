@@ -29,7 +29,7 @@ public class PaginatedResponse<T> extends ListResponse<T> {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e i parametri forniti.
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e i parametri forniti.
      * @param items gli oggetti che la risposta dovrà contenere
      * @param totalCount numero di elementi presenti nel server
      */

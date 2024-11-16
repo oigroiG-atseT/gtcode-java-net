@@ -1,8 +1,12 @@
 package it.gtcode.net.response;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -15,8 +19,8 @@ class SingleResponseTests {
         try {
 
             var expected = new SingleResponse<String>();
-            expected.setStatus(BasicStatus.UNKNOWN);
-            expected.setMessage(BasicStatus.UNKNOWN.getMessage());
+            expected.setStatus(Status.UNKNOWN);
+            expected.setMessage(Status.UNKNOWN.getMessage());
             expected.setItem(null);
 
             var response = new SingleResponse<String>();
@@ -29,15 +33,15 @@ class SingleResponseTests {
     }
 
     @Test
-    void getItem() {
+    void getItemSafely() {
         try {
 
             var response = new SingleResponse<String>();
-            response.setStatus(BasicStatus.SUCCESS);
+            response.setStatus(Status.SUCCESS);
             response.setMessage(null);
             response.setItem("ITEM");
 
-            assertThat(response.getItem())
+            assertThat(response.extractItem())
                     .isNotEmpty()
                     .contains("ITEM");
 
@@ -51,7 +55,7 @@ class SingleResponseTests {
         try {
 
             var expected = new SingleResponse<String>();
-            expected.setStatus(BasicStatus.SUCCESS);
+            expected.setStatus(Status.SUCCESS);
             expected.setMessage(null);
             expected.setItem("ITEM");
 
@@ -63,6 +67,32 @@ class SingleResponseTests {
 
         } catch (Exception e) {
             fail("asSuccess_item", e);
+        }
+    }
+
+    @Test
+    void MustBeJsonSerializable() {
+        try {
+
+            var response = new SingleResponse<Map<String, String>>();
+            response.setStatus(Status.ERROR);
+            response.setMessage(Status.ERROR.getMessage());
+            response.setItem(Map.of("KEY1", "VALUE1"));
+
+            var objectMapper = new ObjectMapper();
+            var serialized = objectMapper.writeValueAsString(response);
+
+            assertThat(serialized)
+                    .contains("\"status\":\"ERROR\"")
+                    .contains("\"message\":\"Errore dal server\"")
+                    .contains("\"item\":{");
+
+            var deserialized = objectMapper.readValue(serialized, new TypeReference<SingleResponse<Map<String, String>>>() {});
+
+            assertThat(deserialized).isEqualTo(response);
+
+        } catch (Exception e) {
+            fail("MustBeJsonSerializable", e);
         }
     }
 

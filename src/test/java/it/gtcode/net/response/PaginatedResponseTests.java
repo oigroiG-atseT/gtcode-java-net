@@ -1,5 +1,7 @@
 package it.gtcode.net.response;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -18,8 +20,8 @@ class PaginatedResponseTests {
         try {
 
             var expected = new PaginatedResponse<String>();
-            expected.setStatus(BasicStatus.UNKNOWN);
-            expected.setMessage(BasicStatus.UNKNOWN.getMessage());
+            expected.setStatus(Status.UNKNOWN);
+            expected.setMessage(Status.UNKNOWN.getMessage());
             expected.setItems(Collections.emptyList());
             expected.setTotalCount(0);
 
@@ -37,8 +39,8 @@ class PaginatedResponseTests {
         try {
 
             var expected = new PaginatedResponse<String>();
-            expected.setStatus(BasicStatus.SUCCESS);
-            expected.setMessage(BasicStatus.UNKNOWN.getMessage());
+            expected.setStatus(Status.SUCCESS);
+            expected.setMessage(Status.UNKNOWN.getMessage());
             expected.setItems(List.of("A", "B", "C"));
             expected.setTotalCount(6);
 
@@ -50,6 +52,34 @@ class PaginatedResponseTests {
 
         } catch (Exception e) {
             fail("asSuccess_list", e);
+        }
+    }
+
+    @Test
+    void MustBeJsonSerializable() {
+        try {
+
+            var response = new PaginatedResponse<String>();
+            response.setStatus(Status.ERROR);
+            response.setMessage(Status.ERROR.getMessage());
+            response.setItems(List.of("A", "B", "C"));
+            response.setTotalCount(6);
+
+            var objectMapper = new ObjectMapper();
+            var serialized = objectMapper.writeValueAsString(response);
+
+            assertThat(serialized)
+                    .contains("\"status\":\"ERROR\"")
+                    .contains("\"message\":\"Errore dal server\"")
+                    .contains("\"items\":[")
+                    .contains("\"totalCount\":6");
+
+            var deserialized = objectMapper.readValue(serialized, new TypeReference<PaginatedResponse<String>>() {});
+
+            assertThat(deserialized).isEqualTo(response);
+
+        } catch (Exception e) {
+            fail("MustBeJsonSerializable", e);
         }
     }
 

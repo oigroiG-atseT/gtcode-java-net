@@ -30,7 +30,7 @@ public class ListResponse<T> extends GenericResponse {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e gli oggetti forniti.
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e gli oggetti forniti.
      * @param items gli oggetti che la risposta dovrà contenere
      */
     public void asSuccess(List<T> items) {

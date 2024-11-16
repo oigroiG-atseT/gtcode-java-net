@@ -30,7 +30,7 @@ public class FTPResponse extends GenericResponse {
     private IOException exception;
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#SUCCESS} e gli oggetti forniti.
+     * Inizializza la risposta con lo stato {@link Status#SUCCESS} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
      * @param message messaggio testuale di risposta dal server
      */
@@ -40,7 +40,7 @@ public class FTPResponse extends GenericResponse {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e gli oggetti forniti.
+     * Inizializza la risposta con lo stato {@link Status#ERROR} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
      * @param message messaggio testuale di risposta dal server
      * @param exception eccezione riscontrata
@@ -51,7 +51,7 @@ public class FTPResponse extends GenericResponse {
     }
 
     /**
-     * Inizializza la risposta con lo stato {@link BasicStatus#ERROR} e gli oggetti forniti.
+     * Inizializza la risposta con lo stato {@link Status#ERROR} e gli oggetti forniti.
      * @param replyCode codice di risposta dal server
      * @param message messaggio testuale di risposta dal server
      */

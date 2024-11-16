@@ -27,4 +27,6 @@ public class FTPConfiguration {
     /** Password con la quale effettuare l'accesso. */
     private String password;
 
+    public FTPConfiguration() { }
+
 }
